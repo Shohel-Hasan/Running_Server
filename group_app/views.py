@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-
+import random
 from course_app.models import CourseStaff
 from user_app.models import User
 from .models import Group, GroupMember, GroupCriteria
@@ -12,7 +12,8 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.contrib.auth import get_user_model
 from post_app.serializers import ThoughtPostSerializer
-
+from post_app.models import SummeryPost
+from post_app.serializers import SummeryPostSerializer
 
 
 
@@ -57,13 +58,18 @@ class GroupViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         group = get_object_or_404(queryset, pk=pk)
         getGroupPost = ThoughtPost.objects.filter(group=group)
+        getGroupPost_summery = SummeryPost.objects.filter(group=group)
         serializer = self.serializer_class(group)
         though_post = ThoughtPostSerializer(data=getGroupPost, many=True, required=False)
+        summery_post = SummeryPostSerializer(data=getGroupPost_summery,many=True,required=False)
         print(though_post.is_valid())
+        print(summery_post.is_valid())
+
+        both_post = random.shuffle(though_post.data + summery_post.data )
         return Response(
             {
                 'group_info':serializer.data,
-                'group_post_info':though_post.data
+                'group_post_info':both_post
             }
             )
 

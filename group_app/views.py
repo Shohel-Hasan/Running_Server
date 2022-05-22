@@ -11,6 +11,9 @@ from rest_framework import viewsets, generics
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.contrib.auth import get_user_model
+from post_app.serializers import ThoughtPostSerializer
+
+
 
 
 # Group ViewSet
@@ -53,8 +56,16 @@ class GroupViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, pk=None):
         queryset = self.queryset
         group = get_object_or_404(queryset, pk=pk)
+        getGroupPost = ThoughtPost.objects.filter(group=group)
         serializer = self.serializer_class(group)
-        return Response(serializer.data)
+        though_post = ThoughtPostSerializer(data=getGroupPost, many=True, required=False)
+        print(though_post.is_valid())
+        return Response(
+            {
+                'group_info':serializer.data,
+                'group_post_info':though_post.data
+            }
+            )
 
     def update(self, request, pk):
         group = Group.objects.filter(pk=pk).exists()
